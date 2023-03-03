@@ -4,24 +4,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "ORDER")
+@Table(name = "ORDERS")
 @Getter
 @NoArgsConstructor
-public class Order {
+public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)               // 연관된 이미지 파일 정보, cascade로 함께 삭제되도록 설정
-    private List<Product> productList = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "products_id")
+    private Products products;
 
     @Column(nullable = false)
     private long orderNum;

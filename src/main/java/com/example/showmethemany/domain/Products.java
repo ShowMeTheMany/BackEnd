@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Table(name = "PRODUCT")
 @Getter
 @NoArgsConstructor
-public class Product {
+public class Products {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
