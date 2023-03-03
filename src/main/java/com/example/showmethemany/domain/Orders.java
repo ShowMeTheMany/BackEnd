@@ -14,14 +14,6 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @OneToOne
-    @JoinColumn(name = "products_id")
-    private Products products;
-
     @Column(nullable = false)
     private long orderNum;
 
@@ -29,11 +21,19 @@ public class Orders {
     private LocalDateTime orderTime;
 
     @Column(nullable = false)
-    private long productNum;
+    private int productNum;
 
     @Column(nullable = false)
-    private long productPrice;
+    private int productPrice;
 
     @Column(nullable = false)
     private boolean orderStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @OneToOne
+    @JoinColumn(name = "products_id")
+    private Products products;
 }

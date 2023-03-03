@@ -14,6 +14,12 @@ public class Basket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private int productNum;
+
+    @Column(nullable = false)
+    private int productPrice;
+
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -21,10 +27,4 @@ public class Basket {
     @OneToOne
     @JoinColumn(name = "products_id")
     private Products products;
-
-    @Column(nullable = false)
-    private int productNum;
-
-    @Column(nullable = false)
-    private int productPrice;
 }
