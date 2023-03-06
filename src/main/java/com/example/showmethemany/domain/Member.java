@@ -2,7 +2,6 @@ package com.example.showmethemany.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 
 @Entity
@@ -25,4 +24,11 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
+    public Member(String loginId, String nickname, String email, String password) {
+        this.email = email;
+        this.loginId = loginId;
+        this.nickname = nickname;
+        this.password = password;
+    }
 }
