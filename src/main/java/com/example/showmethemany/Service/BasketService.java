@@ -12,12 +12,10 @@ import com.example.showmethemany.util.globalResponse.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.showmethemany.util.globalResponse.code.StatusCode.BAD_REQUEST;
+import static com.example.showmethemany.util.globalResponse.code.StatusCode.*;
 
 @Service
 @Slf4j

@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import static com.example.showmethemany.util.globalResponse.code.StatusCode.*;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
@@ -43,7 +41,7 @@ public class MemberService {
         );
 
         if (!member.getPassword().equals(password)) {
-            new CustomException(BAD_REQUEST);
+            throw new CustomException(BAD_REQUEST);
         }
         sessionManager.createSession(signUpRequestDto, httpServletResponse);
         return new MemberResponseDto(member);

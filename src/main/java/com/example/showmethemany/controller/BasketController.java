@@ -20,12 +20,12 @@ import static com.example.showmethemany.util.globalResponse.code.StatusCode.OK;
 public class BasketController {
     private final BasketService basketService;
 
-    @GetMapping(value = "/{userId}")
+    @GetMapping("/{userId}")
     public List<BasketResponseDto> inquiryBasket(@PathVariable Long userId) {
         return basketService.inquiryBasket(userId);
     }
 
-    @PostMapping(value = "/{userId}/{productId}")
+    @PostMapping("/{userId}/{productId}")
     public ResponseEntity<GlobalResponseDto> addBasket(@PathVariable Long userId,
                                                        @PathVariable Long productId,
                                                        @RequestBody BasketRequestDto basketRequestDto) {
@@ -33,14 +33,14 @@ public class BasketController {
         return ResponseUtil.response(OK);
     }
 
-    @DeleteMapping(value = "/{userId}/{productId}")
+    @DeleteMapping("/{userId}/{productId}")
     public ResponseEntity<GlobalResponseDto> deleteBasket(@PathVariable Long userId,
                                                        @PathVariable Long productId) {
         basketService.deleteBasket(userId, productId);
         return ResponseUtil.response(OK);
     }
 
-    @PatchMapping(value = "/{userId}/{productId}")
+    @PatchMapping("/{userId}/{productId}")
     public ResponseEntity<GlobalResponseDto> modifyBasket(@PathVariable Long userId,
                                                           @PathVariable Long productId,
                                                           @RequestBody BasketRequestDto basketRequestDto) {
