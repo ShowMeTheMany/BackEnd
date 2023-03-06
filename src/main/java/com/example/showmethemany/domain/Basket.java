@@ -1,5 +1,6 @@
 package com.example.showmethemany.domain;
 
+import com.example.showmethemany.dto.RequestDto.BasketRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,4 +28,15 @@ public class Basket {
     @OneToOne
     @JoinColumn(name = "products_id")
     private Products products;
+
+    public Basket(int productNum, Member member, Products products) {
+        this.productNum = productNum;
+        this.productPrice = products.getPrice();
+        this.member = member;
+        this.products = products;
+    }
+
+    public void update(int productNum) {
+        this.productNum = productNum;
+    }
 }

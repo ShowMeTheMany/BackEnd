@@ -4,5 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-public class ProductUploadRequestDto {
+@NoArgsConstructor
+public class BasketRequestDto {
+    private int quantity;
 }

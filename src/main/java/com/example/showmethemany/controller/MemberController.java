@@ -20,13 +20,13 @@ import static com.example.showmethemany.util.globalResponse.code.StatusCode.*;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-    @PostMapping(value = "/auth/signUp")
+    @PostMapping("/auth/signUp")
     public ResponseEntity<GlobalResponseDto> signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
         memberService.signUp(signUpRequestDto);
         return ResponseUtil.response(OK);
     }
 
-    @PostMapping(value = "/auth/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<MemberResponseDto> login(@RequestBody SignUpRequestDto signUpRequestDto,
                                                    HttpServletResponse httpServletResponse) {
         return ResponseUtil.response(memberService.login(signUpRequestDto, httpServletResponse));
