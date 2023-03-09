@@ -13,7 +13,7 @@ import static com.example.showmethemany.domain.QProducts.products;
 public class ProductRepositorySupport extends QuerydslRepositorySupport {
 
     private final JPAQueryFactory queryFactory;
-    public ProductRepositorySupport(Class<?> domainClass, JPAQueryFactory queryFactory) {
+    public ProductRepositorySupport(JPAQueryFactory queryFactory) {
         super(Products.class);
         this.queryFactory = queryFactory;
     }
@@ -21,6 +21,13 @@ public class ProductRepositorySupport extends QuerydslRepositorySupport {
     public List<Products> findByAll () {
         return queryFactory.select(products)
                 .from(products)
+                .fetch();
+    }
+
+    public List<Products> findByProductId (Long productId) {
+        return queryFactory.select(products)
+                .from(products)
+                .where(products.id.eq(productId))
                 .fetch();
     }
 }

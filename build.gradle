@@ -1,9 +1,3 @@
-buildscript {						// gradle로 task를 수행할 때에 사용되는 설정
-	ext {							// build.gradle에서 사용하는 전역 변수 설정
-		queryDslVersion = "5.0.0"	// 변수 queryDslVersion에 5.0.0 대입
-	}
-}
-
 plugins {							// gradle task의 집합
 	id 'java'
 	id 'org.springframework.boot' version '2.7.9'
@@ -38,13 +32,9 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// querydsl 의존성 추가
+	def queryDslVersion = "5.0.0"
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"	// buildscript에서 적용한 변수가 여기에 적용
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
-	// annotationProcessor : java 컴파일러 플러그인으로 컴파일 단계에서 어노테이션을 분석 빛 처리해 추가적인 파일을 만든다
-	annotationProcessor(											// @Entity나 Id 등의 어노테이션을 알 수 있도록 추가
-			"javax.persistence:javax.persistence-api",
-			"javax.annotation:javax.annotation-api",
-			"com.querydsl:querydsl-apt:${queryDslVersion}:jpa")
 }
 
 tasks.named('test') {
@@ -72,4 +62,5 @@ configurations {													// build 옵션
 	}
 	querydsl.extendsFrom compileClasspath							// querydsl이 compileClasspath를 상속하도록 설정
 }
+
 
