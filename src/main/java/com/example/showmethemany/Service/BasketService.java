@@ -2,7 +2,7 @@ package com.example.showmethemany.Service;
 
 import com.example.showmethemany.Repository.BasketRepository;
 import com.example.showmethemany.Repository.MemberRepository;
-import com.example.showmethemany.Repository.ProductRepository;
+import com.example.showmethemany.Repository.ProductRepositoryImpl;
 import com.example.showmethemany.domain.Basket;
 import com.example.showmethemany.domain.Member;
 import com.example.showmethemany.domain.Products;
@@ -23,7 +23,7 @@ import static com.example.showmethemany.util.globalResponse.code.StatusCode.*;
 public class BasketService {
     private final MemberRepository memberRepository;
     private final BasketRepository basketRepository;
-    private final ProductRepository productRepository;
+    private final ProductRepositoryImpl productRepository;
 
     // 장바구니 조회
     public List<BasketResponseDto> inquiryBasket(Long userId) {
@@ -46,9 +46,10 @@ public class BasketService {
                 () -> new CustomException(BAD_REQUEST)
         );
 
-        Products products = productRepository.findById(productId).orElseThrow(
-                () -> new CustomException(BAD_REQUEST)
-        );
+        Products products = productRepository.findById(productId);
+        if(Objects.isNull(products)) {
+            throw new CustomException(BAD_REQUEST);
+        }
 
         if (basketRepository.findByMemberAndProducts(member, products).isPresent()) {
             throw new CustomException(BAD_REQUEST);
@@ -63,9 +64,12 @@ public class BasketService {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
-        Products products = productRepository.findById(productId).orElseThrow(
-                () -> new CustomException(BAD_REQUEST)
-        );
+
+        Products products = productRepository.findById(productId);
+        if(Objects.isNull(products)) {
+            throw new CustomException(BAD_REQUEST);
+        }
+
         Basket basket = basketRepository.findByMemberAndProducts(member, products).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
@@ -77,9 +81,12 @@ public class BasketService {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
-        Products products = productRepository.findById(productId).orElseThrow(
-                () -> new CustomException(BAD_REQUEST)
-        );
+
+        Products products = productRepository.findById(productId);
+        if(Objects.isNull(products)) {
+            throw new CustomException(BAD_REQUEST);
+        }
+
         Basket basket = basketRepository.findByMemberAndProducts(member, products).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );

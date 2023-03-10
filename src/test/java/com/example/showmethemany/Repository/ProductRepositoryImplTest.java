@@ -6,26 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class ProductRepositoryTest {
+class ProductRepositoryImplTest {
 
     @Autowired
-    ProductRepository productRepository;
+    private ProductRepositoryImpl productRepository;
 
     @Test
-    @DisplayName("QueryDSL CustomRepository 상속 방식 테스트")
-    void findByProductId() {
+    @DisplayName("QueryDSL 상속/구현 없는 방식 테스트")
+    void findById() {
         //given
         Long productId = 1L;
 
         //when
-        List<Products> products = productRepository.findByProductId(productId);
+        Products products = productRepository.findById(productId);
 
         //then
-        assertEquals(26910, products.get(0).getPrice());
+        assertEquals(26910, products.getPrice());
     }
 }

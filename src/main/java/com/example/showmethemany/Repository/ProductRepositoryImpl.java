@@ -2,25 +2,23 @@ package com.example.showmethemany.Repository;
 
 import com.example.showmethemany.domain.Products;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import javax.persistence.EntityManager;
-import java.util.List;
+import org.springframework.stereotype.Repository;
 
 import static com.example.showmethemany.domain.QProducts.products;
 
-public class ProductRepositoryImpl implements ProductRepositoryCustom {
+@Repository
+public class ProductRepositoryImpl {
 
     private final JPAQueryFactory queryFactory;
 
-    public ProductRepositoryImpl(EntityManager em) {
-        this.queryFactory = new JPAQueryFactory(em);
+    public ProductRepositoryImpl(JPAQueryFactory queryFactory) {
+        this.queryFactory = queryFactory;
     }
 
-    @Override
-    public List<Products> findByProductId(Long productId) {
+    public Products findById (Long productId) {
         return queryFactory.select(products)
                 .from(products)
                 .where(products.id.eq(productId))
-                .fetch();
+                .fetchOne();
     }
 }
