@@ -41,8 +41,8 @@ class DynamicQueryDSLTest {
         List<Products> productsList = dynamicQueryDSL.findProductsBE(nameCondition, BigCategory, SmallCategory);
         for (Products products : productsList) {
             System.out.println(products.getProductName());
-            System.out.println(products.getBigCategory());
-            System.out.println(products.getSmallCategory());
+            System.out.println(products.getCategory().getBigCategory());
+            System.out.println(products.getCategory().getSmallCategory());
         }
 
         //then
@@ -63,8 +63,8 @@ class DynamicQueryDSLTest {
         //then
         for (Products products : productsList) {
             System.out.println(products.getProductName());
-            System.out.println(products.getBigCategory());
-            System.out.println(products.getSmallCategory());
+            System.out.println(products.getCategory().getBigCategory());
+            System.out.println(products.getCategory().getSmallCategory());
         }
         assertEquals("[23SS 최신상] MORGAN 뉴 테일러드 원피스", productsList.get(0).getProductName());
     }
