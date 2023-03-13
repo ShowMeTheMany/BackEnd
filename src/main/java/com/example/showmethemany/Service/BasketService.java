@@ -12,6 +12,8 @@ import com.example.showmethemany.util.globalResponse.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +27,17 @@ public class BasketService {
     private final MemberRepository memberRepository;
     private final BasketRepository basketRepository;
     private final ProductRepository productRepository;
+    private final EntityManager em;
 
     // 장바구니 조회
     @Transactional
     public List<BasketResponseDto> inquiryBasket(Long userId) {
-        Member member = memberRepository.findById(userId).orElseThrow(
+        memberRepository.findById(userId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
-        List<Basket> baskets = basketRepository.findByMember(member);
+        String query = "select b from Basket b join fetch b.products";
+        List<Basket> baskets = em.createQuery(query, Basket.class)
+                        .getResultList();
         List<BasketResponseDto> basketResponseDtoList = new ArrayList<>();
         for (Basket basket : baskets) {
             BasketResponseDto basketResponseDto = new BasketResponseDto(basket.getProducts().getProductName(), basket.getProducts().getPrice(), basket.getProductQuantity());

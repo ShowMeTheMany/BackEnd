@@ -1,9 +1,10 @@
 package com.example.showmethemany.Service;
 
 import com.example.showmethemany.Repository.MemberRepository;
+import com.example.showmethemany.domain.Address;
 import com.example.showmethemany.domain.Member;
 import com.example.showmethemany.dto.RequestDto.SignUpRequestDto;
-import com.example.showmethemany.dto.ResponseDto.MemberResponseDto;
+import com.example.showmethemany.util.passwordEncoder.SHA256EncryptUtil;
 import com.example.showmethemany.util.globalResponse.CustomException;
 import com.example.showmethemany.util.globalResponse.SessionManager;
 import lombok.RequiredArgsConstructor;
@@ -24,19 +25,21 @@ public class MemberService {
     public void signUp(SignUpRequestDto signUpRequestDto) {
         String email = signUpRequestDto.getEmail();
         String loginId = signUpRequestDto.getLoginId();
-        String nickname = signUpRequestDto.getNickname();
-        String password = signUpRequestDto.getPassword();
+        String password = SHA256EncryptUtil.ShaEncoder(signUpRequestDto.getPassword());
+        String name = signUpRequestDto.getName();
 
-        Member member = new Member(loginId,nickname,email,password);
+        Address address = new Address(signUpRequestDto.getCity(), signUpRequestDto.getStreet(), signUpRequestDto.getZipcode());
+
+        Member member = new Member(loginId,name,address,email,password);
         memberRepository.save(member);
     }
 
     @Transactional
-    public MemberResponseDto login(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
-        String email = signUpRequestDto.getEmail();
-        String password = signUpRequestDto.getPassword();
+    public void login(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
+        String loginId = signUpRequestDto.getLoginId();
+        String password = SHA256EncryptUtil.ShaEncoder(signUpRequestDto.getPassword());
 
-        Member member = memberRepository.findByEmail(email).orElseThrow(
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
 
@@ -44,6 +47,5 @@ public class MemberService {
             throw new CustomException(BAD_REQUEST);
         }
         sessionManager.createSession(signUpRequestDto, httpServletResponse);
-        return new MemberResponseDto(member);
     }
 }

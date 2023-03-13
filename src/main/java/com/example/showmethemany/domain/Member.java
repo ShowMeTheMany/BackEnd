@@ -31,8 +31,9 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    public Member(String loginId, Address address, String email, String password) {
+    public Member(String loginId, String name, Address address, String email, String password) {
         this.email = email;
+        this.name = name;
         this.address = address;
         this.loginId = loginId;
         this.password = password;
