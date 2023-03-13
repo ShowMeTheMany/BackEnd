@@ -36,11 +36,11 @@ public class DynamicQueryDSL {
         }
 
         if(bigCategory != null) {
-            builder.and(products.bigCategory.eq(bigCategory));
+            builder.and(products.category.bigCategory.eq(bigCategory));
         }
 
         if(smallCategory != null) {
-            builder.and(products.smallCategory.eq(smallCategory));
+            builder.and(products.category.smallCategory.eq(smallCategory));
         }
 
         return queryFactory.select(products)
@@ -65,10 +65,10 @@ public class DynamicQueryDSL {
     }
 
     private BooleanExpression bigCateEq(String bigCategory) {
-        return bigCategory != null ? products.bigCategory.eq(bigCategory) : null;
+        return bigCategory != null ? products.category.bigCategory.eq(bigCategory) : null;
     }
 
     private BooleanExpression smallCateEq(String smallCategory) {
-        return smallCategory != null ? products.smallCategory.eq(smallCategory) : null;
+        return smallCategory != null ? products.category.smallCategory.eq(smallCategory) : null;
     }
 }

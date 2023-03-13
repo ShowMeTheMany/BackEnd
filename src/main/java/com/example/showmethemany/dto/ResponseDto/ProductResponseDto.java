@@ -16,8 +16,8 @@ public class ProductResponseDto {
 
     public ProductResponseDto(Products products) {
         this.productName = products.getProductName();
-        this.bigCategory = products.getBigCategory();
-        this.smallCategory = products.getSmallCategory();
+        this.bigCategory = products.getCategory().getBigCategory();
+        this.smallCategory = products.getCategory().getSmallCategory();
         this.price = products.getPrice();
         this.stock = products.getStock();
         this.onSale = products.isOnSale();

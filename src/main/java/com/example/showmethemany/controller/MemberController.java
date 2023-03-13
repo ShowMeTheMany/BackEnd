@@ -27,8 +27,9 @@ public class MemberController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<MemberResponseDto> login(@RequestBody SignUpRequestDto signUpRequestDto,
+    public ResponseEntity<GlobalResponseDto> login(@RequestBody SignUpRequestDto signUpRequestDto,
                                                    HttpServletResponse httpServletResponse) {
-        return ResponseUtil.response(memberService.login(signUpRequestDto, httpServletResponse));
+        memberService.login(signUpRequestDto, httpServletResponse);
+        return ResponseUtil.response(OK);
     }
 }
