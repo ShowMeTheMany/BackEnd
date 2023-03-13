@@ -26,6 +26,7 @@ public class BasketService {
     private final ProductRepository productRepository;
 
     // 장바구니 조회
+    @Transactional
     public List<BasketResponseDto> inquiryBasket(Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
@@ -33,7 +34,7 @@ public class BasketService {
         List<Basket> baskets = basketRepository.findByMember(member);
         List<BasketResponseDto> basketResponseDtoList = new ArrayList<>();
         for (Basket basket : baskets) {
-            BasketResponseDto basketResponseDto = new BasketResponseDto(basket.getProducts().getProductName(), basket.getProductPrice(), basket.getProductNum());
+            BasketResponseDto basketResponseDto = new BasketResponseDto(basket.getProducts().getProductName(), basket.getProducts().getPrice(), basket.getProductQuantity());
             basketResponseDtoList.add(basketResponseDto);
         }
         return basketResponseDtoList;
