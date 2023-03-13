@@ -16,27 +16,23 @@ public class Basket {
     private Long id;
 
     @Column(nullable = false)
-    private int productNum;
+    private int productQuantity;
 
-    @Column(nullable = false)
-    private int productPrice;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "products_id")
     private Products products;
 
     public Basket(int productNum, Member member, Products products) {
-        this.productNum = productNum;
-        this.productPrice = products.getPrice();
+        this.productQuantity = productNum;
         this.member = member;
         this.products = products;
     }
 
-    public void update(int productNum) {
-        this.productNum = productNum;
+    public void update(int productQuantity) {
+        this.productQuantity = productQuantity;
     }
 }
