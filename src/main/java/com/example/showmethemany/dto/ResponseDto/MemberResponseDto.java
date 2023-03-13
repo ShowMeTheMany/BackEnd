@@ -15,6 +15,5 @@ public class MemberResponseDto {
     public MemberResponseDto(Member member){
         this.memberId  = member.getId();
         this.email     = member.getEmail();
-        this.nickname  = member.getNickname();
     }
 }

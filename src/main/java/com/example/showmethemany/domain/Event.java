@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "EVENT")
@@ -17,18 +19,14 @@ public class Event {
     @Column(nullable = false)
     private String eventName;
 
+    @Embedded
     @Column(nullable = false)
-    private long productId;
+    private EventPeriod eventPeriod;
 
     @Column(nullable = false)
-    private int discount;
+    private int discountRate;
 
     @Column(nullable = false)
-    private LocalDateTime startedAt;
+    private boolean eventStatus;
 
-    @Column(nullable = false)
-    private LocalDateTime endAt;
-
-    @Column(nullable = false)
-    private boolean status;
 }
