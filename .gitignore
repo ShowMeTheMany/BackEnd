@@ -8,6 +8,7 @@ build/
 *.yml
 *.yaml
 *.properties
+!src/main/resources/log4jdbc.log4j2.properties
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
