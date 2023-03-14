@@ -72,7 +72,6 @@ class OrderServiceTest {
         assertThat(products.getStock()).isEqualTo(0);
     }
 
-
     public synchronized void 주문하기(Long memberId) {
         System.out.println("=========================");
         Member member = memberRepository.findById(memberId).orElseThrow(
@@ -83,14 +82,22 @@ class OrderServiceTest {
         String orderNum = UUID.randomUUID().toString();
         LocalDateTime orderTime = LocalDateTime.now();
         for (Basket basket : baskets) {
-            Orders orders = new Orders(orderNum, orderTime, basket.getProductQuantity(), basket.getProducts().getPrice(), OrderStatus.배송준비, member, basket.getProducts());
+
+            Orders orders = Orders.builder()
+                    .orderNum(orderNum)
+                    .orderTime(orderTime)
+                    .productNum(basket.getProductQuantity())
+                    .productPrice(basket.getProducts().getPrice())
+                    .orderStatus(OrderStatus.배송준비)
+                    .member(member)
+                    .products(basket.getProducts()).build();
+
             if (orders.getProducts().getStock() < basket.getProductQuantity()) {
                 throw new CustomException(BAD_REQUEST);
             }
             orders.getProducts().updateStock(basket.getProductQuantity());
             orderRepository.save(orders);
             productRepository.save(orders.getProducts());
-//            basketRepository.delete(basket);
         }
         System.out.println("=========================");
     }

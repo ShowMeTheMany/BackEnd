@@ -30,8 +30,8 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final EntityManagerFactory emf;
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void orderProduct(Long memberId) {
+
+    public synchronized void orderProduct(Long memberId) {
         System.out.println("=========================");
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST));
@@ -41,7 +41,16 @@ public class OrderService {
         String orderNum = UUID.randomUUID().toString();
         LocalDateTime orderTime = LocalDateTime.now();
         for (Basket basket : baskets) {
-            Orders orders = new Orders(orderNum, orderTime, basket.getProductQuantity(), basket.getProducts().getPrice(), OrderStatus.배송준비, member, basket.getProducts());
+
+            Orders orders = Orders.builder()
+                    .orderNum(orderNum)
+                    .orderTime(orderTime)
+                    .productNum(basket.getProductQuantity())
+                    .productPrice(basket.getProducts().getPrice())
+                    .orderStatus(OrderStatus.배송준비)
+                    .member(member)
+                    .products(basket.getProducts()).build();
+
             if (orders.getProducts().getStock() < basket.getProductQuantity()) {
                 throw new CustomException(BAD_REQUEST);
             }
