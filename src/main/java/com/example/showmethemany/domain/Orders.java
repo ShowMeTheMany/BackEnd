@@ -1,5 +1,6 @@
 package com.example.showmethemany.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
@@ -15,7 +16,7 @@ public class Orders {
     private Long id;
 
     @Column(nullable = false)
-    private long orderNum;
+    private String orderNum;
 
     @Column(nullable = false)
     private LocalDateTime orderTime;
@@ -37,4 +38,15 @@ public class Orders {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "products_id")
     private Products products;
+
+    @Builder
+    public Orders(String orderNum, LocalDateTime orderTime, int productNum, int productPrice, OrderStatus orderStatus, Member member, Products products) {
+        this.orderNum = orderNum;
+        this.orderTime = orderTime;
+        this.productNum = productNum;
+        this.productPrice = productPrice;
+        this.orderStatus = orderStatus;
+        this.member = member;
+        this.products = products;
+    }
 }
