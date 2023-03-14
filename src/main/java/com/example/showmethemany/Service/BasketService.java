@@ -1,5 +1,6 @@
 package com.example.showmethemany.Service;
 
+import com.example.showmethemany.Repository.BasketQueryRepository;
 import com.example.showmethemany.Repository.BasketRepository;
 import com.example.showmethemany.Repository.MemberRepository;
 import com.example.showmethemany.Repository.ProductRepository;
@@ -28,16 +29,16 @@ public class BasketService {
     private final BasketRepository basketRepository;
     private final ProductRepository productRepository;
     private final EntityManager em;
+    private final BasketQueryRepository basketQueryRepository;
 
     // 장바구니 조회
     @Transactional
     public List<BasketResponseDto> inquiryBasket(Long userId) {
-        memberRepository.findById(userId).orElseThrow(
+        Member member = memberRepository.findById(userId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST)
         );
-        String query = "select b from Basket b join fetch b.products";
-        List<Basket> baskets = em.createQuery(query, Basket.class)
-                        .getResultList();
+        // Basket과 Products 한번에 조회
+        List<Basket> baskets = basketQueryRepository.findBasketByMemberId(member.getId());
         List<BasketResponseDto> basketResponseDtoList = new ArrayList<>();
         for (Basket basket : baskets) {
             BasketResponseDto basketResponseDto = new BasketResponseDto(basket.getProducts().getProductName(), basket.getProducts().getPrice(), basket.getProductQuantity());

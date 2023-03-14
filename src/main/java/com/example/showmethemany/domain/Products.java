@@ -39,4 +39,8 @@ public class Products {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EVNET_ID")
     private Event event;
+
+    public void updateStock (int quantity) {
+        this.stock -= quantity;
+    }
 }
