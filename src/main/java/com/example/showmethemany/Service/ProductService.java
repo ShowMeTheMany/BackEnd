@@ -2,9 +2,14 @@ package com.example.showmethemany.Service;
 
 import com.example.showmethemany.Repository.ProductRepository;
 import com.example.showmethemany.domain.Products;
+import com.example.showmethemany.dto.ResponseDto.ProductFilterResponseDto;
 import com.example.showmethemany.dto.ResponseDto.ProductResponseDto;
+import com.example.showmethemany.util.globalResponse.CustomException;
+import com.example.showmethemany.util.globalResponse.code.StatusCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,5 +31,12 @@ public class ProductService {
         }
 
         return productResponseDtoList;
+    }
+
+    public Page<ProductFilterResponseDto> findAllProducts(Pageable pageable, Long categoryId, Long minPrice, Long maxPrice, String stock, String sorting) {
+        System.out.println("=====상품조회=====");
+        Page<ProductFilterResponseDto> page = productRepository.mainFilter(pageable, categoryId, minPrice, maxPrice, stock, sorting);
+        if (page.getNumberOfElements() == 0) throw new CustomException(StatusCode.EMPTY_RESULT_EXCEPTION);
+        return page;
     }
 }

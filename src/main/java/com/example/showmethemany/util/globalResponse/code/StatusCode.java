@@ -10,6 +10,7 @@ public enum StatusCode {
     // 400 BAD_REQUEST : 잘못된 요청
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "400", "요청이 올바르지 않습니다"),
     BAD_REQUEST_TOKEN(HttpStatus.UNAUTHORIZED, "401", "토큰이 유효하지 않습니다."),
+    EMPTY_RESULT_EXCEPTION(HttpStatus.BAD_REQUEST, "400", "조회된 상품이 없습니다."),
 
 
     //TODO ========================= 성공 응답 코드 ===============================
