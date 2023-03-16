@@ -25,7 +25,7 @@ public class BasketQueryRepository {
                 .from(basket)
                 .join(basket.products).fetchJoin()
                 .where(basket.member.id.eq(memberId))
-//                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetch();
     }
 
