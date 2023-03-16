@@ -9,6 +9,5 @@ import javax.persistence.LockModeType;
 import java.util.Optional;
 
 public interface ProductRepository  extends JpaRepository<Products, Long> {
-
-    Optional<Products> findById(Long id);
+    Optional<Products> findById(Long productId);
 }
