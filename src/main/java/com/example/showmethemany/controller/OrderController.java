@@ -17,7 +17,7 @@ public class OrderController {
     private final OrderService orderService;
     @PostMapping(value = "/order/{memberId}")
     public ResponseEntity<GlobalResponseDto> upload(@PathVariable Long memberId) {
-        orderService.orderProduct();
+        orderService.orderProduct(memberId);
         return ResponseUtil.response(OK);
     }
 }

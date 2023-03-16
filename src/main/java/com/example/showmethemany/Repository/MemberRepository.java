@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Member> findByLoginId(String loginId);
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Member> findById(Long userId);
 }

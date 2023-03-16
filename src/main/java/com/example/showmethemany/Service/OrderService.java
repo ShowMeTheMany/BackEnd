@@ -26,18 +26,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
     private final BasketQueryRepository basketQueryRepository;
-    private final BasketRepository basketRepository;
     private final ProductRepository productRepository;
     private final EntityManagerFactory emf;
+    private final BasketRepository basketRepository;
 
 
-    public synchronized void orderProduct(Long memberId) {
-        System.out.println("=========================");
+
+    @Transactional
+    public void orderProduct(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST));
-        System.out.println("=========================");
         List<Basket> baskets = basketQueryRepository.findBasketByMemberId(memberId);
-        System.out.println("=========================");
         String orderNum = UUID.randomUUID().toString();
         LocalDateTime orderTime = LocalDateTime.now();
         for (Basket basket : baskets) {
@@ -54,12 +53,10 @@ public class OrderService {
             if (orders.getProducts().getStock() < basket.getProductQuantity()) {
                 throw new CustomException(BAD_REQUEST);
             }
-            orders.getProducts().updateStock(basket.getProductQuantity());
+            basket.getProducts().updateStock(basket.getProductQuantity());
             orderRepository.save(orders);
             productRepository.save(orders.getProducts());
-//            basketRepository.delete(basket);
         }
-        System.out.println("=========================");
     }
 
 
