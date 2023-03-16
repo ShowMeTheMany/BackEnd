@@ -14,11 +14,9 @@ import static com.example.showmethemany.domain.QProducts.products;
 
 @Repository
 public class BasketQueryRepository {
-    private final JPQLQueryFactory queryFactory;
     private final JPAQueryFactory jpaQueryFactory;
 
     public BasketQueryRepository(JPQLQueryFactory queryFactory, JPAQueryFactory jpaQueryFactory) {
-        this.queryFactory = queryFactory;
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
@@ -32,7 +30,7 @@ public class BasketQueryRepository {
     }
 
     public Products findProductsById (Long productsId) {
-        return queryFactory.select(products)
+        return jpaQueryFactory.select(products)
                 .from(products)
                 .where(products.id.eq(productsId))
                 .fetchOne();
