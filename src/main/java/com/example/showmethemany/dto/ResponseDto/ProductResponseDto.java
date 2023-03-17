@@ -1,6 +1,9 @@
 package com.example.showmethemany.dto.ResponseDto;
 
 import com.example.showmethemany.domain.Products;
+import com.querydsl.core.types.dsl.BooleanPath;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.StringPath;
 import lombok.Getter;
 
 import javax.persistence.Column;
