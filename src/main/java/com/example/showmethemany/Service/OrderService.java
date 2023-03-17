@@ -2,22 +2,16 @@ package com.example.showmethemany.Service;
 
 import com.example.showmethemany.Repository.*;
 import com.example.showmethemany.domain.*;
+import com.example.showmethemany.dto.RequestDto.OrderRequestDto;
 import com.example.showmethemany.util.globalResponse.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import static com.example.showmethemany.util.globalResponse.code.StatusCode.BAD_REQUEST;
+import static com.example.showmethemany.util.globalResponse.code.StatusCode.*;
 
 @Service
 @Slf4j
@@ -26,9 +20,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
     private final BasketQueryRepository basketQueryRepository;
-    private final ProductRepository productRepository;
-    private final EntityManagerFactory emf;
     private final BasketRepository basketRepository;
+    private final OrderQueryRepository orderQueryRepository;
 
 
 
@@ -40,7 +33,6 @@ public class OrderService {
         String orderNum = UUID.randomUUID().toString();
         LocalDateTime orderTime = LocalDateTime.now();
         for (Basket basket : baskets) {
-
             Orders orders = Orders.builder()
                     .orderNum(orderNum)
                     .orderTime(orderTime)
@@ -49,24 +41,55 @@ public class OrderService {
                     .orderStatus(OrderStatus.배송준비)
                     .member(member)
                     .products(basket.getProducts()).build();
-
-            if (orders.getProducts().getStock() < basket.getProductQuantity()) {
-                throw new CustomException(BAD_REQUEST);
-            }
-            basket.getProducts().updateStock(basket.getProductQuantity());
+            validateStock(basket.getProducts(), basket);
+            decreaseProductStock(basket.getProducts(), basket.getProductQuantity());
+            updateProductStatus(basket.getProducts());
             orderRepository.save(orders);
-            productRepository.save(orders.getProducts());
+//            basketRepository.delete(basket);
         }
     }
 
+    @Transactional
+    public void deleteOrder(Long memberId, OrderRequestDto orderRequestDto) {
+        List<Orders> orders = orderQueryRepository.findOrderByOrderNum(orderRequestDto.getOrderNum());
+        for (Orders order : orders) {
+            if (!order.getMember().getId().equals(memberId)){
+                throw new CustomException(BAD_REQUEST);
+            }
+            orderRepository.delete(order);
+            updateProductStatus(order.getProducts());
+            increaseProductStock(order.getProducts(), order.getProductNum());
+        }
+    }
 
+    //테스트용
+    @Transactional
+    public void deleteTest(Long orderId) {
+        Orders order = orderQueryRepository.findOrderById(orderId);
+        updateProductStatus(order.getProducts());
+        increaseProductStock(order.getProducts(), order.getProductNum());
+        orderRepository.delete(order);
+    }
 
-    public synchronized void orderProduct() {
-        EntityManager entityManager = emf.createEntityManager();;
-        Products products = basketQueryRepository.findProductsById(1L);
-        System.out.println("재고수량 = " + products.getStock());
-        products.updateStock(1);
-        productRepository.save(products);
-        System.out.println("재고수량 = " + products.getStock());
+    public void updateProductStatus(Products products) {
+        if (products.getStock() == 0 && products.isOnSale()) {
+            products.updateOnSale(false);
+        } else if (products.getStock() == 0 && !products.isOnSale()){
+            products.updateOnSale(true);
+        }
+    }
+
+    public void validateStock(Products products, Basket basket) {
+        if (products.getStock() < basket.getProductQuantity()) {
+            throw new CustomException(BAD_REQUEST);
+        }
+    }
+
+    public void increaseProductStock(Products products, int quantity){
+        products.increaseStock(quantity);
+    }
+
+    public void decreaseProductStock(Products products, int quantity){
+        products.decreaseStock(quantity);
     }
 }

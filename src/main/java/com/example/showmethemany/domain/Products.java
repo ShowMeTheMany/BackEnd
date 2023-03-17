@@ -40,7 +40,15 @@ public class Products {
     @JoinColumn(name = "EVNET_ID")
     private Event event;
 
-    public void updateStock (int quantity) {
+    public void increaseStock (int quantity) {
+        this.stock += quantity;
+    }
+
+    public void decreaseStock (int quantity) {
         this.stock -= quantity;
+    }
+
+    public void updateOnSale (boolean onSale) {
+        this.onSale = onSale;
     }
 }
