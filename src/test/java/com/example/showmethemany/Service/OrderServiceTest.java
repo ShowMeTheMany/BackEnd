@@ -1,9 +1,6 @@
 package com.example.showmethemany.Service;
 
-import com.example.showmethemany.Repository.BasketQueryRepository;
-import com.example.showmethemany.Repository.MemberRepository;
-import com.example.showmethemany.Repository.OrderRepository;
-import com.example.showmethemany.Repository.ProductRepository;
+import com.example.showmethemany.Repository.*;
 import com.example.showmethemany.domain.*;
 import com.example.showmethemany.util.globalResponse.CustomException;
 import org.hibernate.Transaction;
@@ -34,12 +31,6 @@ class OrderServiceTest {
     private ProductRepository productRepository;
 
     @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private EntityManagerFactory emf;
-
-    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
@@ -47,6 +38,13 @@ class OrderServiceTest {
 
     @Autowired
     private BasketQueryRepository basketQueryRepository;
+
+    @Autowired
+    private BasketRepository basketRepository;
+
+    @Autowired
+    private OrderService orderService;
+
 
 
     public class CountDownLatchT {
@@ -63,7 +61,8 @@ class OrderServiceTest {
         for (int i = 1; i <= 10; i++) {
             executorService.execute(() -> {
 //                상품_구매하기();
-                주문하기(1L);
+//                주문하기(1L);
+                orderService.orderProduct(1L);
                 countDownLatch.countDown();
             });
         }
@@ -72,12 +71,14 @@ class OrderServiceTest {
         assertThat(products.getStock()).isEqualTo(0);
     }
 
-    public synchronized void 주문하기(Long memberId) {
+
+    @Transactional
+    public void 주문하기(Long memberId) {
         System.out.println("=========================");
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST));
         System.out.println("=========================");
-        List<Basket> baskets = basketQueryRepository.findBasketByMemberId(memberId);
+        List<Basket> baskets = basketRepository.findByMemberId(memberId);
         System.out.println("=========================");
         String orderNum = UUID.randomUUID().toString();
         LocalDateTime orderTime = LocalDateTime.now();
