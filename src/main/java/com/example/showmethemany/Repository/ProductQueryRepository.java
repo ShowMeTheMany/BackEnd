@@ -1,12 +1,19 @@
 package com.example.showmethemany.Repository;
 
 import com.example.showmethemany.config.SearchCondition;
+import com.example.showmethemany.domain.Orders;
 import com.example.showmethemany.domain.Products;
+import com.example.showmethemany.dto.ResponseDto.ProductResponseDto;
+import com.querydsl.core.types.NullExpression;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
@@ -30,9 +37,8 @@ public class ProductQueryRepository {
                         eqProductName(searchCondition.getProductName()),
                         eqBigCategory(searchCondition.getBigCategory()),
                         eqSmallCategory(searchCondition.getSmallCategory()),
-                        eqPrice(searchCondition.getPrice()),
-                        eqStock(searchCondition.getStock()),
-                        eqOnSale(searchCondition.isOnSale())
+                        eqPrice(searchCondition.getMinPrice(), searchCondition.getMaxPrice()),
+                        eqOnSale(searchCondition.getOnSale())
                 );
 
         List<Products> content = queryFactory
@@ -41,16 +47,27 @@ public class ProductQueryRepository {
                         eqProductName(searchCondition.getProductName()),
                         eqBigCategory(searchCondition.getBigCategory()),
                         eqSmallCategory(searchCondition.getSmallCategory()),
-                        eqPrice(searchCondition.getPrice()),
-                        eqStock(searchCondition.getStock()),
-                        eqOnSale(searchCondition.isOnSale())
+                        eqPrice(searchCondition.getMinPrice(), searchCondition.getMaxPrice()),
+                        eqOnSale(searchCondition.getOnSale())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(products.id.desc())
+                .orderBy(productOrderBy(searchCondition.getOrderBy(), searchCondition.getDirection()))
                 .fetch();
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    private OrderSpecifier<?> productOrderBy(String orderBy, Order direction) {
+        switch (orderBy != null ? orderBy : "null") {
+            case "productName":
+                return new OrderSpecifier<>(direction, products.productName);
+            case "price":
+                return new OrderSpecifier<>(direction, products.price);
+            case "null":
+            default:
+                return new OrderSpecifier<>(direction, products.id);
+        }
     }
 
     private BooleanExpression eqProductName(String productName) {
@@ -74,22 +91,20 @@ public class ProductQueryRepository {
         return products.category.smallCategory.eq(smallCategory);
     }
 
-    private BooleanExpression eqPrice(int price) {
-        if(price == 0) {
+    private BooleanExpression eqPrice(Integer minPrice, Integer maxPrice) {
+        if (minPrice == null && maxPrice == null) {
             return null;
+        } else if (minPrice != null && maxPrice == null) {
+            return products.price.goe(minPrice);
+        } else if (minPrice == null && maxPrice != null) {
+            return products.price.loe(maxPrice);
         }
-        return products.price.eq(price);
-    }
-
-    private BooleanExpression eqStock(int stock) {
-        if(stock == 0) {
-            return null;
-        }
-        return products.stock.eq(stock);
+        return products.price.between(minPrice, maxPrice);
+//        return products.price.eq(price);
     }
 
     private BooleanExpression eqOnSale(Boolean onSale) {
-        if(StringUtils.isEmpty(onSale.toString())) {
+        if (onSale == null) {
             return null;
         }
         return products.onSale.eq(onSale);
