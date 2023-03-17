@@ -1,11 +1,10 @@
 package com.example.showmethemany.Service;
 
+import com.example.showmethemany.Repository.ProductQueryRepository;
 import com.example.showmethemany.Repository.ProductRepository;
+import com.example.showmethemany.config.SearchCondition;
 import com.example.showmethemany.domain.Products;
-import com.example.showmethemany.dto.ResponseDto.ProductFilterResponseDto;
 import com.example.showmethemany.dto.ResponseDto.ProductResponseDto;
-import com.example.showmethemany.util.globalResponse.CustomException;
-import com.example.showmethemany.util.globalResponse.code.StatusCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ProductQueryRepository productQueryRepository;
 
 
     public List<ProductResponseDto> inquiry() {
@@ -33,10 +33,8 @@ public class ProductService {
         return productResponseDtoList;
     }
 
-    public Page<ProductFilterResponseDto> findAllProducts(Pageable pageable, Long categoryId, Long minPrice, Long maxPrice, String stock, String sorting) {
-        System.out.println("=====상품조회=====");
-        Page<ProductFilterResponseDto> page = productRepository.mainFilter(pageable, categoryId, minPrice, maxPrice, stock, sorting);
-        if (page.getNumberOfElements() == 0) throw new CustomException(StatusCode.EMPTY_RESULT_EXCEPTION);
-        return page;
+    // 상품 필터링 검색
+    public Page<Products> searchProducts(Pageable pageable, SearchCondition searchCondition) {
+        return productQueryRepository.searchPage(pageable, searchCondition);
     }
 }
