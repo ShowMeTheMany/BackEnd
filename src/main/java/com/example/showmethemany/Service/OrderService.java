@@ -62,15 +62,6 @@ public class OrderService {
         }
     }
 
-    //테스트용
-    @Transactional
-    public void deleteTest(Long orderId) {
-        Orders order = orderQueryRepository.findOrderById(orderId);
-        updateProductStatus(order.getProducts());
-        increaseProductStock(order.getProducts(), order.getProductNum());
-        orderRepository.delete(order);
-    }
-
     public void updateProductStatus(Products products) {
         if (products.getStock() == 0 && products.isOnSale()) {
             products.updateOnSale(false);
