@@ -28,7 +28,6 @@ public class BasketService {
     private final MemberRepository memberRepository;
     private final BasketRepository basketRepository;
     private final ProductRepository productRepository;
-    private final EntityManager em;
     private final BasketQueryRepository basketQueryRepository;
 
     // 장바구니 조회
@@ -38,7 +37,7 @@ public class BasketService {
                 () -> new CustomException(BAD_REQUEST)
         );
         // Basket과 Products 한번에 조회
-        List<Basket> baskets = basketQueryRepository.findBasketByMemberId(member.getId());
+        List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(member.getId());
         List<BasketResponseDto> basketResponseDtoList = new ArrayList<>();
         for (Basket basket : baskets) {
             BasketResponseDto basketResponseDto = new BasketResponseDto(basket.getProducts().getProductName(), basket.getProducts().getPrice(), basket.getProductQuantity());

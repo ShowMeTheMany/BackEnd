@@ -20,6 +20,18 @@ public class OrderController {
         return ResponseUtil.response(OK);
     }
 
+    @PostMapping(value = "/orderLock/{memberId}")
+    public ResponseEntity<GlobalResponseDto> uploadLock(@PathVariable Long memberId) {
+        orderService.orderProductLock(memberId);
+        return ResponseUtil.response(OK);
+    }
+
+    @PostMapping(value = "/orderSynchronized/{memberId}")
+    public ResponseEntity<GlobalResponseDto> uploadSynchronized(@PathVariable Long memberId) {
+        orderService.orderProductSynchronized(memberId);
+        return ResponseUtil.response(OK);
+    }
+
     @DeleteMapping(value = "/order/{memberId}")
     public ResponseEntity<GlobalResponseDto> delete(@PathVariable Long memberId,
                                                     @RequestBody OrderRequestDto orderRequestDto) {
