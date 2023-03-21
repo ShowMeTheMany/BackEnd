@@ -54,4 +54,14 @@ public class ProductService {
             products.updateProductsDiscount(products.getPrice()*((1-(event.getDiscountRate()/100))));
         }
     }
+
+    // 이벤트 마감시 할인가와 이벤트 초기화
+    @Transactional
+    public void deleteEvent(Event event) {
+        List<Products> productsList = productQueryRepository.findProductByEvent(event);
+        for (Products products : productsList) {
+            products.updateProductsDiscount(0);
+            products.updateProductsEventId(null);
+        }
+    }
 }

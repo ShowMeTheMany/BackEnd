@@ -15,6 +15,7 @@ import java.util.List;
 public class EventScheduler {
     private final EventService eventService;
     private final EventRepository eventRepository;
+    private final ProductService productService;
 
     @Scheduled(cron = "0 0 * * * *") // 매시각 정각 실행
     public void startEvent() {
@@ -37,6 +38,7 @@ public class EventScheduler {
                     eventService.activeEvent(event.getId());
                 } else if ((event.getEventStatus().equals(EventStatus.ACTIVATED)) && (eventEndTime.getHour() == nowTime.getHour())) {
                     eventService.expireEvent(event.getId());
+                    productService.deleteEvent(event);
                 }
             }
         }
