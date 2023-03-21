@@ -3,11 +3,9 @@ package com.example.showmethemany.Service;
 import com.example.showmethemany.Repository.*;
 import com.example.showmethemany.domain.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -19,7 +17,6 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 class OrderServiceTest {
     @Autowired
     private ProductRepository productRepository;
@@ -32,15 +29,17 @@ class OrderServiceTest {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+    @Autowired
+    private OrderService orderService;
 
 
     @Test
     void 주문_취소_동시성_테스트() throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(999);
-        CountDownLatch countDownLatch = new CountDownLatch(999);
+        ExecutorService executorService = Executors.newFixedThreadPool(1000);
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
 
-        for (int i = 1; i <= 999; i++) {
-            Long finalI = (long) i + 62832;
+        for (int i = 1; i <= 1000; i++) {
+            Long finalI = (long) i + 63831;
             executorService.execute(() -> {
                 주문_취소하기(finalI);
                 countDownLatch.countDown();
@@ -52,8 +51,22 @@ class OrderServiceTest {
         assertThat(products.getStock()).isEqualTo(1000);
     }
 
+    @Test
+    void 주문하기_동시성_테스트() throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(1000);
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
 
+        for (int i = 1; i <= 1000; i++) {
+            executorService.execute(() -> {
+                orderService.orderProduct(1L);
+                countDownLatch.countDown();
+            });
+        }
 
+        countDownLatch.await();
+        Products products = productRepository.findById(1L).get();
+        assertThat(products.getStock()).isEqualTo(0);
+    }
 
     @Rollback(false) // 테스트 후 롤백하지 않음
     public void 주문_취소하기(Long orderId) {
@@ -72,7 +85,6 @@ class OrderServiceTest {
             throw e;
         }
     }
-
 
     public void 재고_늘리기(Products products, int quantity){
         products.increaseStock(quantity);

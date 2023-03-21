@@ -15,12 +15,20 @@ public class BasketQueryRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public List<Basket> findBasketByMemberId(Long memberId) {
+    public List<Basket> findBasketByMemberIdWithLock(Long memberId) {
         return jpaQueryFactory.select(basket)
                 .from(basket)
                 .join(basket.products).fetchJoin()
                 .where(basket.member.id.eq(memberId))
                 .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetch();
+    }
+
+    public List<Basket> findBasketByMemberIdNoneLock(Long memberId) {
+        return jpaQueryFactory.select(basket)
+                .from(basket)
+                .join(basket.products).fetchJoin()
+                .where(basket.member.id.eq(memberId))
                 .fetch();
     }
 
