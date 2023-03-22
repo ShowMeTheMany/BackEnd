@@ -51,7 +51,7 @@ public class ProductService {
                     () -> new CustomException(StatusCode.BAD_REQUEST)
             );
             products.updateProductsEventId(event);
-            products.updateProductsDiscount(products.getPrice()*((1-(event.getDiscountRate()/100))));
+            products.updateProductsDiscount((int) (products.getPrice() * (1-(event.getDiscountRate()/(double) 100))));
         }
     }
 
