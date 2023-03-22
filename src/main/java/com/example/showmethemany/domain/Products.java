@@ -26,7 +26,6 @@ public class Products {
     private int price;
 
     @Column
-    @ColumnDefault("0")
     private int discount;
 
     @Column(nullable = false)
@@ -37,7 +36,7 @@ public class Products {
     private boolean onSale;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EVNET_ID")
+    @JoinColumn(name = "EVENT_ID")
     private Event event;
 
     public void increaseStock (int quantity) {
@@ -50,5 +49,13 @@ public class Products {
 
     public void updateOnSale (boolean onSale) {
         this.onSale = onSale;
+    }
+
+    public void updateProductsDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public void updateProductsEventId(Event event) {
+        this.event = event;
     }
 }

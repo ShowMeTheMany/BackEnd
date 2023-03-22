@@ -67,12 +67,20 @@ public class ProductQueryRepository {
     }
 
     public List<Products> findProductByEvent(Event event) {
-
         return queryFactory
                 .selectFrom(products)
                 .join(products.event).fetchJoin()
                 .where(
                         eqEvent(event)
+                )
+                .fetch();
+    }
+    public List<Products> findProductByEventId(Long eventId) {
+        return queryFactory
+                .selectFrom(products)
+                .join(products.event).fetchJoin()
+                .where(
+                        products.event.id.eq(eventId)
                 )
                 .fetch();
     }
