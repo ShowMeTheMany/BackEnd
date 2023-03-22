@@ -6,10 +6,8 @@ import com.example.showmethemany.dto.RequestDto.OrderRequestDto;
 import com.example.showmethemany.util.globalResponse.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.RedisClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -37,23 +35,16 @@ public class OrderService {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST));
         List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
-        String orderNum = UUID.randomUUID().toString();
-        LocalDateTime orderTime = LocalDateTime.now();
+        String orderNum = makeOrderNumber();
+        LocalDateTime orderTime = makeOrderDataTime();
         for (Basket basket : baskets) {
-            Orders orders = Orders.builder()
-                    .orderNum(orderNum)
-                    .orderTime(orderTime)
-                    .productNum(basket.getProductQuantity())
-                    .productPrice(basket.getProducts().getPrice())
-                    .orderStatus(OrderStatus.배송준비)
-                    .member(member)
-                    .products(basket.getProducts()).build();
-            validateStock(basket.getProducts(), basket);
-            decreaseProductStock(basket.getProducts(), basket.getProductQuantity());
-            updateProductStatus(basket.getProducts());
+            Products products = basket.getProducts();
+            Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+            validateStock(products, basket);
+            decreaseProductStock(products, basket.getProductQuantity());
+            updateProductStatus(products);
             orderRepository.save(orders);
-            productRepository.save(basket.getProducts());
-//            basketRepository.delete(basket);
+            productRepository.save(products);
         }
     }
 
@@ -63,22 +54,17 @@ public class OrderService {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(BAD_REQUEST));
         List<Basket> baskets = basketQueryRepository.findBasketByMemberIdWithLock(memberId);
-        String orderNum = UUID.randomUUID().toString();
-        LocalDateTime orderTime = LocalDateTime.now();
+        String orderNum = makeOrderNumber();
+        LocalDateTime orderTime = makeOrderDataTime();
         for (Basket basket : baskets) {
-            Orders orders = Orders.builder()
-                    .orderNum(orderNum)
-                    .orderTime(orderTime)
-                    .productNum(basket.getProductQuantity())
-                    .productPrice(basket.getProducts().getPrice())
-                    .orderStatus(OrderStatus.배송준비)
-                    .member(member)
-                    .products(basket.getProducts()).build();
-            validateStock(basket.getProducts(), basket);
-            decreaseProductStock(basket.getProducts(), basket.getProductQuantity());
-            updateProductStatus(basket.getProducts());
+            Products products = basket.getProducts();
+            Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+            validateStock(products, basket);
+            decreaseProductStock(products, basket.getProductQuantity());
+            updateProductStatus(products);
             orderRepository.save(orders);
-//            basketRepository.delete(basket);
+            productRepository.save(products);
+            basketRepository.delete(basket);
         }
     }
 
@@ -93,23 +79,17 @@ public class OrderService {
                 Member member = memberRepository.findById(memberId).orElseThrow(
                         () -> new CustomException(BAD_REQUEST));
                 List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
-                String orderNum = UUID.randomUUID().toString();
-                LocalDateTime orderTime = LocalDateTime.now();
+                String orderNum = makeOrderNumber();
+                LocalDateTime orderTime = makeOrderDataTime();
                 for (Basket basket : baskets) {
-                    Orders orders = Orders.builder()
-                            .orderNum(orderNum)
-                            .orderTime(orderTime)
-                            .productNum(basket.getProductQuantity())
-                            .productPrice(basket.getProducts().getPrice())
-                            .orderStatus(OrderStatus.배송준비)
-                            .member(member)
-                            .products(basket.getProducts()).build();
-                    validateStock(basket.getProducts(), basket);
-                    decreaseProductStock(basket.getProducts(), basket.getProductQuantity());
-                    updateProductStatus(basket.getProducts());
+                    Products products = basket.getProducts();
+                    Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+                    validateStock(products, basket);
+                    decreaseProductStock(products, basket.getProductQuantity());
+                    updateProductStatus(products);
                     orderRepository.save(orders);
-                    productRepository.save(basket.getProducts());
-//                basketRepository.delete(basket);
+                    productRepository.save(products);
+                    basketRepository.delete(basket);
                 }
             }
         } catch (InterruptedException e) {
@@ -133,6 +113,18 @@ public class OrderService {
         }
     }
 
+    private Orders makeOrder(Member member, String orderNum, LocalDateTime orderTime, Basket basket, Products products) {
+        Orders orders = Orders.builder()
+                .orderNum(orderNum)
+                .orderTime(orderTime)
+                .productNum(basket.getProductQuantity())
+                .productPrice(products.getPrice())
+                .orderStatus(OrderStatus.배송준비)
+                .member(member)
+                .products(products).build();
+        return orders;
+    }
+
     public void updateProductStatus(Products products) {
         if (products.getStock() == 0 && products.isOnSale()) {
             products.updateOnSale(false);
@@ -145,6 +137,14 @@ public class OrderService {
         if (products.getStock() < basket.getProductQuantity()) {
             throw new CustomException(BAD_REQUEST);
         }
+    }
+
+    public String makeOrderNumber() {
+        return UUID.randomUUID().toString();
+    }
+
+    public LocalDateTime makeOrderDataTime() {
+        return LocalDateTime.now();
     }
 
     public void increaseProductStock(Products products, int quantity){
