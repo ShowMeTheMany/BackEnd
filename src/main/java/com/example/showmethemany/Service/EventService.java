@@ -28,7 +28,7 @@ public class EventService {
     private final ProductService productService;
 
     @Transactional
-    public void createEvent(EventRequestDto eventRequestDto) {
+    public Event createEvent(EventRequestDto eventRequestDto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         LocalDateTime startTime = LocalDateTime.parse(eventRequestDto.getStartedAt(), formatter);
@@ -55,6 +55,7 @@ public class EventService {
 //            products.updateProductsDiscount(products.getPrice()*((event.getDiscountRate()/100)));
 //        }
         productService.updateProducts(productsIdList, event);
+        return event;
     }
 
 
