@@ -33,13 +33,13 @@ public class OrderService {
     //synchronized 적용
     public synchronized void orderProductSynchronized(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException(BAD_REQUEST));
+                () -> new CustomException(NOT_FOUND_MEMBER));
         List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
         String orderNum = makeOrderNumber();
         LocalDateTime orderTime = makeOrderDataTime();
         for (Basket basket : baskets) {
             Products products = basket.getProducts();
-            Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+            Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
             validateStock(products, basket);
             decreaseProductStock(products, basket.getProductQuantity());
             updateProductStatus(products);
@@ -52,13 +52,13 @@ public class OrderService {
     @Transactional
     public void orderProductLock(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException(BAD_REQUEST));
+                () -> new CustomException(NOT_FOUND_MEMBER));
         List<Basket> baskets = basketQueryRepository.findBasketByMemberIdWithLock(memberId);
         String orderNum = makeOrderNumber();
         LocalDateTime orderTime = makeOrderDataTime();
         for (Basket basket : baskets) {
             Products products = basket.getProducts();
-            Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+            Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
             validateStock(products, basket);
             decreaseProductStock(products, basket.getProductQuantity());
             updateProductStatus(products);
@@ -77,19 +77,19 @@ public class OrderService {
 
             if (available) {
                 Member member = memberRepository.findById(memberId).orElseThrow(
-                        () -> new CustomException(BAD_REQUEST));
+                        () -> new CustomException(NOT_FOUND_MEMBER));
                 List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
                 String orderNum = makeOrderNumber();
                 LocalDateTime orderTime = makeOrderDataTime();
                 for (Basket basket : baskets) {
                     Products products = basket.getProducts();
-                    Orders orders = makeOrder(member, orderNum, orderTime, basket, products);
+                    Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
                     validateStock(products, basket);
                     decreaseProductStock(products, basket.getProductQuantity());
                     updateProductStatus(products);
                     orderRepository.save(orders);
-                    productRepository.save(products);
                     basketRepository.delete(basket);
+                    productRepository.save(products);
                 }
             }
         } catch (InterruptedException e) {
@@ -105,7 +105,7 @@ public class OrderService {
         List<Orders> orders = orderQueryRepository.findOrderByOrderNum(orderRequestDto.getOrderNum());
         for (Orders order : orders) {
             if (!order.getMember().getId().equals(memberId)){
-                throw new CustomException(BAD_REQUEST);
+                throw new CustomException(NOT_EXIST_ORDER);
             }
             orderRepository.delete(order);
             updateProductStatus(order.getProducts());
@@ -113,7 +113,7 @@ public class OrderService {
         }
     }
 
-    private Orders makeOrder(Member member, String orderNum, LocalDateTime orderTime, Basket basket, Products products) {
+    private Orders makeOrderByBuilder(Member member, String orderNum, LocalDateTime orderTime, Basket basket, Products products) {
         Orders orders = Orders.builder()
                 .orderNum(orderNum)
                 .orderTime(orderTime)
@@ -135,7 +135,7 @@ public class OrderService {
 
     public void validateStock(Products products, Basket basket) {
         if (products.getStock() < basket.getProductQuantity()) {
-            throw new CustomException(BAD_REQUEST);
+            throw new CustomException(QUANTITY_OF_ORDERS_EXCEEDS_STOCK);
         }
     }
 
