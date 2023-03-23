@@ -6,6 +6,8 @@ import com.example.showmethemany.domain.Products;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,7 @@ public class ProductQueryRepository {
     public ProductQueryRepository(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
+
     public Page<Products> searchPage(Pageable pageable, SearchCondition searchCondition) {
         JPAQuery<Long> countQuery = queryFactory
                 .select(products.count())
@@ -89,11 +92,20 @@ public class ProductQueryRepository {
 
 
     private BooleanExpression eqProductName(String productName) {
-        if(StringUtils.isEmpty(productName)) {
+        if (StringUtils.isEmpty(productName)) {
             return null;
         }
-        return products.productName.contains(productName);
+        NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
+                "function('fullTextSearch',{0},{1})", products.productName, "+" + productName + "*");
+        return booleanTemplate.gt(0);
     }
+
+//    private BooleanExpression eqProductName(String productName) {
+//        if(StringUtils.isEmpty(productName)) {
+//            return null;
+//        }
+//        return products.productName.contains(productName);
+//    }
 
     private BooleanExpression eqBigCategory(String bigCategory) {
         if(StringUtils.isEmpty(bigCategory)) {
