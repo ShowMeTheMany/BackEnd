@@ -1,6 +1,7 @@
 package com.example.showmethemany.Repository;
 
 import com.example.showmethemany.config.SearchCondition;
+import com.example.showmethemany.domain.Event;
 import com.example.showmethemany.domain.Products;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -68,6 +69,28 @@ public class ProductQueryRepository {
         }
     }
 
+    public List<Products> findProductByEvent(Event event) {
+        return queryFactory
+                .selectFrom(products)
+                .join(products.event).fetchJoin()
+                .where(
+                        eqEvent(event)
+                )
+                .fetch();
+    }
+    public List<Products> findProductByEventId(Long eventId) {
+        return queryFactory
+                .selectFrom(products)
+                .join(products.event).fetchJoin()
+                .where(
+                        products.event.id.eq(eventId)
+                )
+                .fetch();
+    }
+
+
+
+
     private BooleanExpression eqProductName(String productName) {
         if (StringUtils.isEmpty(productName)) {
             return null;
@@ -115,5 +138,12 @@ public class ProductQueryRepository {
             return null;
         }
         return products.onSale.eq(onSale);
+    }
+
+    private BooleanExpression eqEvent(Event event) {
+        if(event == null) {
+            return null;
+        }
+        return products.event.eq(event);
     }
 }
