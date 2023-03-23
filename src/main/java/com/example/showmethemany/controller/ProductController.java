@@ -30,8 +30,8 @@ public class ProductController {
 
     // 상품 필터링 검색
     @GetMapping(value= "/search")
-    public Page<Products> searchProducts(final Pageable pageable,
-                                         SearchCondition searchCondition) {
+    public Page<Products> searchProducts(Pageable pageable,
+                                         @RequestBody SearchCondition searchCondition) {
         return productService.searchProducts(pageable, searchCondition);
     }
 

@@ -37,7 +37,7 @@ public class Products {
     private boolean onSale;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EVNET_ID")
+    @JoinColumn(name = "EVENT_ID")
     private Event event;
 
     public void increaseStock (int quantity) {
