@@ -23,13 +23,13 @@ public class Products {
     private Category category;
 
     @Column(nullable = false)
-    private int price;
+    private Integer price;
 
     @Column
-    private int discount;
+    private Integer discountPrice;
 
     @Column(nullable = false)
-    private int stock;
+    private Integer stock;
 
     @Column(nullable = false)
     @ColumnDefault("false")
@@ -51,8 +51,8 @@ public class Products {
         this.onSale = onSale;
     }
 
-    public void updateProductsDiscount(int discount) {
-        this.discount = discount;
+    public void updateProductsDiscount(int discountPrice) {
+        this.discountPrice = discountPrice;
     }
 
     public void updateProductsEventId(Event event) {
