@@ -26,7 +26,7 @@ public class Products {
     private int price;
 
     @Column
-    private int discount;
+    private int discountPrice;
 
     @Column(nullable = false)
     private int stock;
@@ -51,8 +51,8 @@ public class Products {
         this.onSale = onSale;
     }
 
-    public void updateProductsDiscount(int discount) {
-        this.discount = discount;
+    public void updateProductsDiscount(int discountPrice) {
+        this.discountPrice = discountPrice;
     }
 
     public void updateProductsEventId(Event event) {

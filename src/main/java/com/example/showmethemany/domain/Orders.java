@@ -22,7 +22,7 @@ public class Orders {
     private LocalDateTime orderTime;
 
     @Column(nullable = false)
-    private int productNum;
+    private int productQuantity;
 
     @Column(nullable = false)
     private int productPrice;
@@ -43,7 +43,7 @@ public class Orders {
     public Orders(String orderNum, LocalDateTime orderTime, int productNum, int productPrice, OrderStatus orderStatus, Member member, Products products) {
         this.orderNum = orderNum;
         this.orderTime = orderTime;
-        this.productNum = productNum;
+        this.productQuantity = productNum;
         this.productPrice = productPrice;
         this.orderStatus = orderStatus;
         this.member = member;

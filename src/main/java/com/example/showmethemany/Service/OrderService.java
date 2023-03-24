@@ -109,7 +109,7 @@ public class OrderService {
             }
             orderRepository.delete(order);
             updateProductStatus(order.getProducts());
-            increaseProductStock(order.getProducts(), order.getProductNum());
+            increaseProductStock(order.getProducts(), order.getProductQuantity());
         }
     }
 

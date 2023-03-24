@@ -77,7 +77,7 @@ class OrderServiceTest {
         try {
             Orders order = orderQueryRepository.findOrderById(orderId);
             재고_상태변경(order.getProducts());
-            재고_늘리기(order.getProducts(), order.getProductNum());
+            재고_늘리기(order.getProducts(), order.getProductQuantity());
             orderRepository.delete(order);
             transactionManager.commit(status);
         } catch (Exception e) {
