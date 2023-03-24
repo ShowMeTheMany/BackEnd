@@ -23,13 +23,13 @@ public class Products {
     private Category category;
 
     @Column(nullable = false)
-    private int price;
+    private Integer price;
 
     @Column
-    private int discountPrice;
+    private Integer discountPrice;
 
     @Column(nullable = false)
-    private int stock;
+    private Integer stock;
 
     @Column(nullable = false)
     @ColumnDefault("false")

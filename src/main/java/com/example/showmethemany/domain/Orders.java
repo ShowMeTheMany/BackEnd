@@ -22,10 +22,10 @@ public class Orders {
     private LocalDateTime orderTime;
 
     @Column(nullable = false)
-    private int productQuantity;
+    private Integer productQuantity;
 
     @Column(nullable = false)
-    private int productPrice;
+    private Integer productPrice;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
