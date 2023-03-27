@@ -3,13 +3,17 @@ package com.example.showmethemany.Service;
 import com.example.showmethemany.Repository.*;
 import com.example.showmethemany.domain.*;
 import com.example.showmethemany.dto.RequestDto.OrderRequestDto;
+import com.example.showmethemany.util.TransactionUtil;
 import com.example.showmethemany.util.globalResponse.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +32,7 @@ public class OrderService {
     private final OrderQueryRepository orderQueryRepository;
     private final ProductRepository productRepository;
     private final RedissonClient redissonClient;
+    private final TransactionUtil transactionUtil;
 
 
     //synchronized 적용
@@ -64,33 +69,71 @@ public class OrderService {
             updateProductStatus(products);
             orderRepository.save(orders);
             productRepository.save(products);
-            basketRepository.delete(basket);
+//            basketRepository.delete(basket);
         }
     }
 
-    //Redisson을 이용한 분산락
+    //Redisson과 트랜잭션을 이용한 분산락
     public void orderProduct(Long memberId) {
-        RLock lock = redissonClient.getLock(String.valueOf(memberId));
+        RLock lock = redissonClient.getLock("orderLock");
 
         try {
-            boolean available = lock.tryLock(180, 180, TimeUnit.SECONDS);
+            boolean available = lock.tryLock(300, 300, TimeUnit.SECONDS);
 
             if (available) {
-                Member member = memberRepository.findById(memberId).orElseThrow(
-                        () -> new CustomException(NOT_FOUND_MEMBER));
-                List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
-                String orderNum = makeOrderNumber();
-                LocalDateTime orderTime = makeOrderDataTime();
-                for (Basket basket : baskets) {
-                    Products products = basket.getProducts();
-                    Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
-                    validateStock(products, basket);
-                    decreaseProductStock(products, basket.getProductQuantity());
-                    updateProductStatus(products);
-                    orderRepository.save(orders);
-                    basketRepository.delete(basket);
-                    productRepository.save(products);
+                TransactionStatus status = transactionUtil.startTransaction();
+                try {
+                    Member member = memberRepository.findById(memberId).orElseThrow(
+                            () -> new CustomException(NOT_FOUND_MEMBER));
+                    List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
+                    String orderNum = makeOrderNumber();
+                    LocalDateTime orderTime = makeOrderDataTime();
+                    for (Basket basket : baskets) {
+                        Products products = basket.getProducts();
+                        Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
+                        validateStock(products, basket);
+                        decreaseProductStock(products, basket.getProductQuantity());
+                        updateProductStatus(products);
+                        basketRepository.delete(basket);
+                        orderRepository.save(orders);
+                    }
+                    transactionUtil.transactionCommit(status);
+                } catch (Exception e) {
+                    transactionUtil.transactionRollback(status);
+                    throw e;
                 }
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    // Redisson만 이용해서 분산락 구현
+    public void orderProductByRedissonLock(Long memberId) {
+        RLock lock = redissonClient.getLock("orderLock");
+
+        try {
+            boolean available = lock.tryLock(300, 300, TimeUnit.SECONDS);
+
+            if (available) {
+                    Member member = memberRepository.findById(memberId).orElseThrow(
+                            () -> new CustomException(NOT_FOUND_MEMBER));
+                    List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
+                    String orderNum = makeOrderNumber();
+                    LocalDateTime orderTime = makeOrderDataTime();
+                    for (Basket basket : baskets) {
+                        Products products = basket.getProducts();
+                        Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
+                        validateStock(products, basket);
+                        decreaseProductStock(products, basket.getProductQuantity());
+                        updateProductStatus(products);
+                        basketRepository.delete(basket);
+                        orderRepository.save(orders);
+                        productRepository.save(products);
+                    }
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

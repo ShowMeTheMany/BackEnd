@@ -15,19 +15,25 @@ import static com.example.showmethemany.util.globalResponse.code.StatusCode.OK;
 public class OrderController {
     private final OrderService orderService;
     @PostMapping(value = "/order/{memberId}")
-    public ResponseEntity<GlobalResponseDto> upload(@PathVariable Long memberId) {
+    public ResponseEntity<GlobalResponseDto> order(@PathVariable Long memberId) {
         orderService.orderProduct(memberId);
         return ResponseUtil.response(OK);
     }
 
+    @PostMapping(value = "/orderRedisson/{memberId}")
+    public ResponseEntity<GlobalResponseDto> orderRedisson(@PathVariable Long memberId) {
+        orderService.orderProductByRedissonLock(memberId);
+        return ResponseUtil.response(OK);
+    }
+
     @PostMapping(value = "/orderLock/{memberId}")
-    public ResponseEntity<GlobalResponseDto> uploadLock(@PathVariable Long memberId) {
+    public ResponseEntity<GlobalResponseDto> orderLock(@PathVariable Long memberId) {
         orderService.orderProductLock(memberId);
         return ResponseUtil.response(OK);
     }
 
     @PostMapping(value = "/orderSynchronized/{memberId}")
-    public ResponseEntity<GlobalResponseDto> uploadSynchronized(@PathVariable Long memberId) {
+    public ResponseEntity<GlobalResponseDto> orderSynchronized(@PathVariable Long memberId) {
         orderService.orderProductSynchronized(memberId);
         return ResponseUtil.response(OK);
     }
