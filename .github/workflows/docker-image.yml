@@ -63,8 +63,11 @@ jobs:
     - name: Pull image from Amazon EC2 and restart container
       run: |
         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_IMG_NAME
-        docker stop test_con && docker rm test_con
         docker run -d --name test_con -p 80:80 --restart unless-stopped ${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_IMG_NAME
+        
+        
+#        docker stop test_con && docker rm test_con
+#        docker run -d --name test_con -p 80:80 --restart unless-stopped ${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_IMG_NAME
         
         
 #         script: |
