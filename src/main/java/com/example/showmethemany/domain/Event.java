@@ -1,16 +1,18 @@
 package com.example.showmethemany.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "EVENT")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +21,35 @@ public class Event {
     @Column(nullable = false)
     private String eventName;
 
-    @Embedded
     @Column(nullable = false)
-    private EventPeriod eventPeriod;
+    private LocalDateTime startedAt;
 
     @Column(nullable = false)
-    private int discountRate;
+    private LocalDateTime endAt;
 
     @Column(nullable = false)
-    private boolean eventStatus;
+    private Integer discountRate;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private EventStatus eventStatus;
+
+    public void updateEvent(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public void updateEvent(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+    }
+
+    public void updateEvent(Integer discountRate) {
+        this.discountRate = discountRate;
+    }
+
+    public void updateStartTime(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+    public void updateEndTime(LocalDateTime endAt) {
+        this.endAt = endAt;
+    }
 }

@@ -1,19 +1,17 @@
 package com.example.showmethemany.Repository;
 
 import com.example.showmethemany.config.SearchCondition;
-import com.example.showmethemany.domain.Orders;
+import com.example.showmethemany.domain.Event;
 import com.example.showmethemany.domain.Products;
-import com.example.showmethemany.dto.ResponseDto.ProductResponseDto;
-import com.querydsl.core.types.NullExpression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
@@ -29,6 +27,7 @@ public class ProductQueryRepository {
     public ProductQueryRepository(JPAQueryFactory queryFactory) {
         this.queryFactory = queryFactory;
     }
+
     public Page<Products> searchPage(Pageable pageable, SearchCondition searchCondition) {
         JPAQuery<Long> countQuery = queryFactory
                 .select(products.count())
@@ -70,12 +69,43 @@ public class ProductQueryRepository {
         }
     }
 
+    public List<Products> findProductByEvent(Event event) {
+        return queryFactory
+                .selectFrom(products)
+                .join(products.event).fetchJoin()
+                .where(
+                        eqEvent(event)
+                )
+                .fetch();
+    }
+    public List<Products> findProductByEventId(Long eventId) {
+        return queryFactory
+                .selectFrom(products)
+                .join(products.event).fetchJoin()
+                .where(
+                        products.event.id.eq(eventId)
+                )
+                .fetch();
+    }
+
+
+
+
     private BooleanExpression eqProductName(String productName) {
-        if(StringUtils.isEmpty(productName)) {
+        if (StringUtils.isEmpty(productName)) {
             return null;
         }
-        return products.productName.contains(productName);
+        NumberTemplate booleanTemplate = Expressions.numberTemplate(Double.class,
+                "function('fullTextSearch',{0},{1})", products.productName, "+" + productName + "*");
+        return booleanTemplate.gt(0);
     }
+
+//    private BooleanExpression eqProductName(String productName) {
+//        if(StringUtils.isEmpty(productName)) {
+//            return null;
+//        }
+//        return products.productName.contains(productName);
+//    }
 
     private BooleanExpression eqBigCategory(String bigCategory) {
         if(StringUtils.isEmpty(bigCategory)) {
@@ -108,5 +138,12 @@ public class ProductQueryRepository {
             return null;
         }
         return products.onSale.eq(onSale);
+    }
+
+    private BooleanExpression eqEvent(Event event) {
+        if(event == null) {
+            return null;
+        }
+        return products.event.eq(event);
     }
 }

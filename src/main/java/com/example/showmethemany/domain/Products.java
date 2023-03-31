@@ -23,24 +23,39 @@ public class Products {
     private Category category;
 
     @Column(nullable = false)
-    private int price;
+    private Integer price;
 
     @Column
-    @ColumnDefault("0")
-    private int discount;
+    private Integer discountPrice;
 
     @Column(nullable = false)
-    private int stock;
+    private Integer stock;
 
     @Column(nullable = false)
     @ColumnDefault("false")
     private boolean onSale;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EVNET_ID")
+    @JoinColumn(name = "EVENT_ID")
     private Event event;
 
-    public void updateStock (int quantity) {
+    public void increaseStock (int quantity) {
+        this.stock += quantity;
+    }
+
+    public void decreaseStock (int quantity) {
         this.stock -= quantity;
+    }
+
+    public void updateOnSale (boolean onSale) {
+        this.onSale = onSale;
+    }
+
+    public void updateProductsDiscount(int discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public void updateProductsEventId(Event event) {
+        this.event = event;
     }
 }
