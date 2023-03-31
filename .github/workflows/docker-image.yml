@@ -5,7 +5,8 @@ on:
     branches: [ "dev" ]
     
 env:
-  DOCKER_IMG_NAME: ${GITHUB_SHA::7}
+#   DOCKER_IMG_NAME: ${GITHUB_SHA::7}
+  DOCKER_IMG_NAME: showmethemany
   
 jobs:
 
