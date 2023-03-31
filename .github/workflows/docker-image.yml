@@ -73,9 +73,8 @@ jobs:
         username: ubuntu
         key: ${{ secrets.KEY }}
         script: |
-          sudo docker rm -f $(docker ps -qa)
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_IMG_NAME
-          docker image prune -f
+          docker run -d --name test_con -p 80:80 --restart unless-stopped ${{ secrets.DOCKERHUB_USERNAME }}/$DOCKER_IMG_NAME
         
         
 #        docker stop test_con && docker rm test_con
