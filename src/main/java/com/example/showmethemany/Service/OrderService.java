@@ -140,7 +140,7 @@ public class OrderService {
         RLock lock = redissonClient.getLock("orderLock");
 
         try {
-            boolean available = lock.tryLock(300, 300, TimeUnit.SECONDS);
+            boolean available = lock.tryLock(20, 20, TimeUnit.SECONDS);
 
             if (available) {
                     Member member = memberRepository.findById(memberId).orElseThrow(
