@@ -14,6 +14,13 @@ import static com.example.showmethemany.util.globalResponse.code.StatusCode.OK;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+
+    @PostMapping(value = "/orderNoneLock/{memberId}")
+    public ResponseEntity<GlobalResponseDto> orderNoneLock(@PathVariable Long memberId) {
+        orderService.orderProductNoneLock(memberId);
+        return ResponseUtil.response(OK);
+    }
+
     @PostMapping(value = "/order/{memberId}")
     public ResponseEntity<GlobalResponseDto> order(@PathVariable Long memberId) {
         orderService.orderProduct(memberId);

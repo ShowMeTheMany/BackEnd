@@ -35,8 +35,8 @@ public class OrderService {
     private final TransactionUtil transactionUtil;
 
 
-    //synchronized 적용
-    public synchronized void orderProductSynchronized(Long memberId) {
+    @Transactional
+    public void orderProductNoneLock(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(NOT_FOUND_MEMBER));
         List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
@@ -49,7 +49,32 @@ public class OrderService {
             decreaseProductStock(products, basket.getProductQuantity());
             updateProductStatus(products);
             orderRepository.save(orders);
-            productRepository.save(products);
+            basketRepository.delete(basket);
+        }
+    }
+
+    //synchronized 적용
+    public synchronized void orderProductSynchronized(Long memberId) {
+        TransactionStatus status = transactionUtil.startTransaction();
+        try {
+            Member member = memberRepository.findById(memberId).orElseThrow(
+                    () -> new CustomException(NOT_FOUND_MEMBER));
+            List<Basket> baskets = basketQueryRepository.findBasketByMemberIdNoneLock(memberId);
+            String orderNum = makeOrderNumber();
+            LocalDateTime orderTime = makeOrderDataTime();
+            for (Basket basket : baskets) {
+                Products products = basket.getProducts();
+                Orders orders = makeOrderByBuilder(member, orderNum, orderTime, basket, products);
+                validateStock(products, basket);
+                decreaseProductStock(products, basket.getProductQuantity());
+                updateProductStatus(products);
+                orderRepository.save(orders);
+                productRepository.save(products);
+                basketRepository.delete(basket);
+            }
+            transactionUtil.transactionCommit(status);
+        } catch (Exception e){
+            transactionUtil.transactionRollback(status);
         }
     }
 
@@ -68,8 +93,7 @@ public class OrderService {
             decreaseProductStock(products, basket.getProductQuantity());
             updateProductStatus(products);
             orderRepository.save(orders);
-            productRepository.save(products);
-//            basketRepository.delete(basket);
+            basketRepository.delete(basket);
         }
     }
 
@@ -78,7 +102,7 @@ public class OrderService {
         RLock lock = redissonClient.getLock("orderLock");
 
         try {
-            boolean available = lock.tryLock(300, 300, TimeUnit.SECONDS);
+            boolean available = lock.tryLock(20, 20, TimeUnit.SECONDS);
 
             if (available) {
                 TransactionStatus status = transactionUtil.startTransaction();
@@ -142,10 +166,41 @@ public class OrderService {
         }
     }
 
-
-    @Transactional
+    // Redisson 분산락을 이용한 주문 취소
     public void deleteOrder(Long memberId, OrderRequestDto orderRequestDto) {
-        List<Orders> orders = orderQueryRepository.findOrderByOrderNum(orderRequestDto.getOrderNum());
+        RLock lock = redissonClient.getLock("orderDeleteLock");
+        try {
+            boolean available = lock.tryLock(300, 300, TimeUnit.SECONDS);
+            if (available) {
+                TransactionStatus status = transactionUtil.startTransaction();
+                try {
+                    List<Orders> orders = orderQueryRepository.findOrderByOrderNumNoneLock(orderRequestDto.getOrderNum());
+                    for (Orders order : orders) {
+                        if (!order.getMember().getId().equals(memberId)) {
+                            throw new CustomException(NOT_EXIST_ORDER);
+                        }
+                        orderRepository.delete(order);
+                        updateProductStatus(order.getProducts());
+                        increaseProductStock(order.getProducts(), order.getProductQuantity());
+                    }
+                    transactionUtil.transactionCommit(status);
+                } catch (Exception e) {
+                    transactionUtil.transactionRollback(status);
+                    throw e;
+                }
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    // 배타적 락을 이용한 주문 취소
+    @Transactional
+    public void deleteOrderByLock(Long memberId, OrderRequestDto orderRequestDto) {
+        List<Orders> orders = orderQueryRepository.findOrderByOrderNumLock(orderRequestDto.getOrderNum());
         for (Orders order : orders) {
             if (!order.getMember().getId().equals(memberId)){
                 throw new CustomException(NOT_EXIST_ORDER);
