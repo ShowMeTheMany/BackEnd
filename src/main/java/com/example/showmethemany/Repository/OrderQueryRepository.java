@@ -13,7 +13,15 @@ public class OrderQueryRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public List<Orders> findOrderByOrderNum(String orderNum) {
+    public List<Orders> findOrderByOrderNumNoneLock(String orderNum) {
+        return jpaQueryFactory.select(orders)
+                .from(orders)
+                .join(orders.products).fetchJoin()
+                .where(orders.orderNum.eq(orderNum))
+                .fetch();
+    }
+
+    public List<Orders> findOrderByOrderNumLock(String orderNum) {
         return jpaQueryFactory.select(orders)
                 .from(orders)
                 .join(orders.products).fetchJoin()
