@@ -26,7 +26,7 @@
 <br /> <br />
 
 ## ⚙️ 서비스 아키텍쳐
-![showmethemany_architecture](https://user-images.githubusercontent.com/117756400/230522441-19e6df42-69df-4235-a1de-bfffc512ea2b.png)
+![showmethemany_architecture](https://user-images.githubusercontent.com/117756400/230712853-35d4e2c5-bf1e-4d12-9d34-eb439160ec4b.png)
 
 <br /> <br />
 
@@ -47,12 +47,30 @@
 <summary>MySQL</summary>
 <div markdown="1">
 
+- **기술적 필요성**
+  - 프로젝트에서 사용되는 데이터가 구조화되어 있기 때문에 각각의 데이터들을 테이블로 구성하여 관리해야 한다고 판단해 RDBMS 사용 결정
+  
+- **후보군**
+  - MySQL / PostreSQL
+  
+- **의사 조율 및 결정**
+  - 대용량 데이터 처리가 목적이기 때문에 대규모 DB 시스템에 적합한 확장성과 높은 성능을 제공하고 멀티 쓰레드 아키텍처를 사용하여 동시성 처리를 가능하게 하며 상대적으로 레퍼런스가 많은 MySQL을 선택
+<br />
 </div>
 </details>
 <details>
 <summary>Redis</summary>
 <div markdown="1">
 
+- **기술적 필요성**
+  - 주문하기 및 주문 취소하기 API를 멀티 쓰레드 환경에서 실행할 때 자료가 업데이트 되는 과정에서 정보가 유실될 경우를 방지하기 위해 도입
+  
+- **후보군**
+  - Synchronized / Pessimistic Lock / Redisson
+  
+- **의사 조율 및 결정**
+  - 데드락을 방지하기 위한 타임 아웃 기능을 제공하고 락을 어플리케이션 단계에서 관리하기 때문에 데이터베이스까지 책임이 전파되지 않는 Redisson을 사용하기로 결정
+<br />
 </div>
 </details>
 <details>
@@ -67,7 +85,6 @@
   
 - **의사 조율 및 결정**
   - 현재 프로젝트 관리를 깃허브를 통하여 진행하고 있고, 소규모 프로젝트이고 추가적인 설치 과정 없이 Github에서 제공하는 환경에서 CI 작업이 가능하기 때문에 Github Action을 사용하는 것이 용이할 거라 생각함  
-  - 프로젝트 규모를 생각했을 때 초기 설정이 적고 편의성이 높아 리소스를 줄이는 방향으로 진행. 따라서 Github Action과 AWS에서 제공하는 Code Deploy를 이용하여 자동화 배포를 하기로 결정
 <br />
 </div>
 </details>
@@ -75,60 +92,39 @@
 <summary>QueryDSL</summary>
 <div markdown="1">
 
+- **기술적 필요성**
+  - DB에서 데이터를 쿼리하기 위해 도입
+  
+- **후보군**
+  - JPA / Native Query / JPQL / QueryDSL
+  
+- **의사 조율 및 결정**
+  - 데이터 처리 시 다양한 검색 방식으로 동적 쿼리 구현이 필요하다고 판단. 그리고 쿼리를 문자열이 아닌 코드로 작성하고 컴파일 시점에 문법 오류를 확인할 수 있는 QueryDSL를 사용하기로 결정. 여기에 단순 조회는 JPA 메서드를 함께 사용하는 방향으로 함
+<br />
 </div>
 </details>
 <details>
-<summary>JUnit5</summary>
+<summary>Logback</summary>
 <div markdown="1">
 
+- **기술적 필요성**
+  - 개발 과정에서 문제 원인 파악 및 개발의 안정석 확보 위해 도입
+  
+- **후보군**
+  - Hibernate log / Log4jdbc
+  
+- **의사 조율 및 결정**
+  - 설정에 따라 어느 쓰레드가 전송한 쿼리인지 볼 수 있고 해당 쿼리에 대한 결과 값도 알 수 있는 Log4jdbc 도입
+<br />
 </div>
 </details>
 
 <br /> <br />
 
 ## 📢 성능 개선
-### ➖ 검색
-<details>
-<summary>Full Scan</summary>
-<div markdown="1">
-
-</div>
-</details>
-<details>
-<summary>B-TREE Index</summary>
-<div markdown="1">
-
-</div>
-</details>
-<details>
-<summary>Full Text Index✅</summary>
-<div markdown="1">
-
-</div>
-</details>
-
-<br />
-
-### ➖ 주문
-<details>
-<summary>Synchronized</summary>
-<div markdown="1">
-
-</div>
-</details>
-<details>
-<summary>Pessimistic Lock</summary>
-<div markdown="1">
-
-</div>
-</details>
-<details>
-<summary>Redisson 분산락✅</summary>
-<div markdown="1">
-
-</div>
-</details>
-
+### ➖ [크롤링](https://www.notion.so/4f753a3dd2534a51abd5a9d281b2646a)
+### ➖ [검색](https://www.notion.so/62a535b9629a43ddb4b1bb8d639f7ebc)
+### ➖ [주문](https://www.notion.so/696207f719754385bb18991fa5641fdf)
 <br /> <br />
 
 ## ⚽ 트러블 슈팅
@@ -137,13 +133,13 @@
 <div markdown="1">
 
 - **문제 상황**  
-  - 
+  - 반복문 내 하위 엔티티 개수만큼 불필요한 쿼리 발생
 
 - **이유**  
-  - 
+  - 프록시 객체로 내려받은 하위 엔티티는 데이터를 사용할 때마다 초기화하기 때문 
 
 - **해결 방법**  
-  - 
+  - JPQL fetch join를 통해 하위 엔티티의 데이터를 한 번에 내려받은 후 조회하기로 변경
   <br />
 </div>
 </details>
@@ -152,13 +148,29 @@
 <div markdown="1">
 
 - **문제 상황**  
-  - 
+  - 테스트 클래스 내에서 Transactional 어노테이션이 정상적으로 실행되지 않아 TransactionlRequiredException 발생
 
 - **이유**  
-  - 
+  - 스프링에서는 프록시 객체를 생성한 후에 프록시 객체가 @Transactional이 적용된 빈을 대신해서 호출해주는데 스프링이 관리하지 않는 클래스는 프록시 객체를 생성할 수 없기 때문에 @Component 등으로 빈에 등록해야 함
+  - 테스트 클래스에는 스프링 빈에 등록된 적이 없기 때문에 @Transactional 작동 안 함
 
 - **해결 방법**  
-  -   
+  - PlatformTransactionManager 인터페이스를 주입받아 트랜잭션 적용
+  <br />
+</div>
+</details>
+<details>
+<summary>📌 Primitive Type에서 IllegalArgumentException 발생</summary>
+<div markdown="1">
+
+- **문제 상황**  
+  - JPA로 insert 하는 과정에서 set 하지 않은 필드에 대해 에러 발생
+
+- **이유**  
+  - Primitive Type은 null을 담을 수 없기 때문
+
+- **해결 방법**  
+  - 필드 타입을 Reference Type으로 수정하여 해결
   <br />
 </div>
 </details>
