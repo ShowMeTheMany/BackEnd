@@ -104,11 +104,11 @@
 </div>
 </details>
 <details>
-<summary>Logback</summary>
+<summary>Query Log</summary>
 <div markdown="1">
 
 - **기술적 필요성**
-  - 개발 과정에서 문제 원인 파악 및 개발의 안정석 확보 위해 도입
+  - 애플리케이션에서 실제로 실행된 쿼리 로그를 효과적으로 확인하고 분석하기 위해 도입
   
 - **후보군**
   - Hibernate log / Log4jdbc
